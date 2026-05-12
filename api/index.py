@@ -4,6 +4,7 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Optional
 
+import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -20,9 +21,18 @@ app.add_middleware(
 )
 
 
-def get_db():
-    from supabase import create_client
-    return create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_KEY"])
+def sb_headers() -> dict:
+    key = os.environ["SUPABASE_KEY"]
+    return {
+        "apikey": key,
+        "Authorization": f"Bearer {key}",
+        "Content-Type": "application/json",
+        "Prefer": "return=representation",
+    }
+
+
+def sb_url(table: str) -> str:
+    return f"{os.environ['SUPABASE_URL']}/rest/v1/{table}"
 
 
 class ViolationIn(BaseModel):
@@ -33,14 +43,13 @@ class ViolationIn(BaseModel):
 
 @app.get("/api/violations")
 def get_violations():
-    db = get_db()
-    res = db.table("violations").select("*").order("timestamp", desc=False).execute()
-    return res.data
+    r = httpx.get(sb_url("violations"), headers=sb_headers(), params={"order": "timestamp.asc"})
+    r.raise_for_status()
+    return r.json()
 
 
 @app.post("/api/violations", status_code=201)
 def create_violation(data: ViolationIn):
-    db = get_db()
     violation = {
         "id": str(uuid.uuid4())[:8],
         "person": data.person.strip(),
@@ -48,24 +57,29 @@ def create_violation(data: ViolationIn):
         "amount": data.amount or 1.0,
         "timestamp": datetime.now().isoformat(),
     }
-    res = db.table("violations").insert(violation).execute()
-    return res.data[0]
+    r = httpx.post(sb_url("violations"), headers=sb_headers(), json=violation)
+    r.raise_for_status()
+    return r.json()[0]
 
 
 @app.delete("/api/violations/{violation_id}")
 def delete_violation(violation_id: str):
-    db = get_db()
-    res = db.table("violations").delete().eq("id", violation_id).execute()
-    if not res.data:
+    r = httpx.delete(
+        sb_url("violations"),
+        headers=sb_headers(),
+        params={"id": f"eq.{violation_id}"},
+    )
+    r.raise_for_status()
+    if not r.json():
         raise HTTPException(status_code=404, detail="Not found")
     return {"ok": True}
 
 
 @app.get("/api/stats")
 def get_stats():
-    db = get_db()
-    res = db.table("violations").select("*").execute()
-    violations = res.data
+    r = httpx.get(sb_url("violations"), headers=sb_headers())
+    r.raise_for_status()
+    violations = r.json()
     total = sum(float(v["amount"]) for v in violations)
     offenders: dict[str, dict] = defaultdict(lambda: {"total": 0.0, "count": 0})
     for v in violations:
