@@ -52,10 +52,19 @@ class ViolationIn(BaseModel):
 
 @app.get("/api/health")
 def health():
+    try:
+        result = sb("GET", "violations", params={"limit": "1"})
+        db_ok = True
+        db_error = None
+    except Exception as e:
+        db_ok = False
+        db_error = str(e)
     return {
         "ok": True,
         "supabase_url": os.environ.get("SUPABASE_URL", "NOT SET"),
         "key_set": bool(os.environ.get("SUPABASE_KEY")),
+        "db_ok": db_ok,
+        "db_error": db_error,
     }
 
 
