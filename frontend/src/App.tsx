@@ -301,7 +301,6 @@ export default function App() {
                   <div className="feed-row-bot">
                     <span className="feed-word">"{v.word}"</span>
                     <span className="feed-time">{new Date(v.timestamp).toLocaleString('fr-FR')}</span>
-                    <button className="feed-del" onClick={() => handleDelete(v.id)} title="Supprimer">✕</button>
                   </div>
                 </div>
               ))}
