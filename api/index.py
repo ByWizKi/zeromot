@@ -24,7 +24,7 @@ app.add_middleware(
 
 
 def sb(method: str, table: str, data: dict = None, params: dict = None) -> list:
-    key = os.environ["SUPABASE_KEY"]
+    key = os.environ["SUPABASE_KEY"].strip()
     base = os.environ["SUPABASE_URL"].strip().rstrip("/")
     url = f"{base}/rest/v1/{table}"
     if params:
