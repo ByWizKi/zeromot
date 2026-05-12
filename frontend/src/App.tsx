@@ -68,7 +68,7 @@ function ParticleCanvas() {
     window.addEventListener('resize', resize)
 
     type Particle = { x: number; y: number; vx: number; vy: number; size: number; color: string; alpha: number }
-    const COLORS = ['#00f0ff', '#ff0055', '#00ff88', '#7700ff']
+    const COLORS = ['#7c3aed', '#06b6d4', '#10b981', '#a855f7', '#f43f5e']
     const particles: Particle[] = Array.from({ length: 90 }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
@@ -102,7 +102,7 @@ function ParticleCanvas() {
             ctx.beginPath()
             ctx.moveTo(p.x, p.y)
             ctx.lineTo(p2.x, p2.y)
-            ctx.strokeStyle = '#00f0ff'
+            ctx.strokeStyle = '#7c3aed'
             ctx.globalAlpha = 0.08 * (1 - d / 110)
             ctx.lineWidth = 0.6
             ctx.stroke()
