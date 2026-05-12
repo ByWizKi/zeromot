@@ -7,7 +7,10 @@ from typing import Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
+
+STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 
 app = FastAPI()
 app.add_middleware(
@@ -91,3 +94,13 @@ def get_stats():
         reverse=True,
     )
     return {"total": total, "count": len(violations), "offenders": ranked}
+
+
+@app.get("/{path:path}")
+def serve_frontend(path: str):
+    # Serve static assets (JS, CSS, etc.)
+    candidate = os.path.join(STATIC_DIR, path)
+    if path and os.path.isfile(candidate):
+        return FileResponse(candidate)
+    # SPA fallback
+    return FileResponse(os.path.join(STATIC_DIR, "index.html"))
