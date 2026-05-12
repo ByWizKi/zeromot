@@ -1,10 +1,5 @@
 {
-  "buildCommand": "cd frontend && npm install && npm run build && mkdir -p ../api/static && cp -r dist/. ../api/static/",
-  "functions": {
-    "api/index.py": {
-      "includeFiles": "api/static/**"
-    }
-  },
+  "buildCommand": "cd frontend && npm install && npm run build && cd .. && mkdir -p api/static && cp -r frontend/dist/. api/static/",
   "routes": [
     { "src": "/(.*)", "dest": "/api/index" }
   ]
