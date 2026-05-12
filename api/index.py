@@ -1,4 +1,3 @@
-import json
 import os
 import uuid
 from collections import defaultdict
@@ -20,28 +19,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-VIOLATIONS_KEY = "zeromot:violations"
 
-
-def get_redis():
-    from upstash_redis import Redis
-    return Redis(
-        url=os.environ["KV_REST_API_URL"],
-        token=os.environ["KV_REST_API_TOKEN"],
-    )
-
-
-def read_violations() -> list[dict]:
-    r = get_redis()
-    data = r.get(VIOLATIONS_KEY)
-    if not data:
-        return []
-    return json.loads(data) if isinstance(data, str) else data
-
-
-def write_violations(violations: list[dict]):
-    r = get_redis()
-    r.set(VIOLATIONS_KEY, json.dumps(violations, ensure_ascii=False))
+def get_db():
+    from supabase import create_client
+    return create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_KEY"])
 
 
 class ViolationIn(BaseModel):
@@ -52,11 +33,14 @@ class ViolationIn(BaseModel):
 
 @app.get("/api/violations")
 def get_violations():
-    return read_violations()
+    db = get_db()
+    res = db.table("violations").select("*").order("timestamp", desc=False).execute()
+    return res.data
 
 
 @app.post("/api/violations", status_code=201)
 def create_violation(data: ViolationIn):
+    db = get_db()
     violation = {
         "id": str(uuid.uuid4())[:8],
         "person": data.person.strip(),
@@ -64,25 +48,24 @@ def create_violation(data: ViolationIn):
         "amount": data.amount or 1.0,
         "timestamp": datetime.now().isoformat(),
     }
-    violations = read_violations()
-    violations.append(violation)
-    write_violations(violations)
-    return violation
+    res = db.table("violations").insert(violation).execute()
+    return res.data[0]
 
 
 @app.delete("/api/violations/{violation_id}")
 def delete_violation(violation_id: str):
-    violations = read_violations()
-    new_list = [v for v in violations if v["id"] != violation_id]
-    if len(new_list) == len(violations):
+    db = get_db()
+    res = db.table("violations").delete().eq("id", violation_id).execute()
+    if not res.data:
         raise HTTPException(status_code=404, detail="Not found")
-    write_violations(new_list)
     return {"ok": True}
 
 
 @app.get("/api/stats")
 def get_stats():
-    violations = read_violations()
+    db = get_db()
+    res = db.table("violations").select("*").execute()
+    violations = res.data
     total = sum(float(v["amount"]) for v in violations)
     offenders: dict[str, dict] = defaultdict(lambda: {"total": 0.0, "count": 0})
     for v in violations:
@@ -98,9 +81,7 @@ def get_stats():
 
 @app.get("/{path:path}")
 def serve_frontend(path: str):
-    # Serve static assets (JS, CSS, etc.)
     candidate = os.path.join(STATIC_DIR, path)
     if path and os.path.isfile(candidate):
         return FileResponse(candidate)
-    # SPA fallback
     return FileResponse(os.path.join(STATIC_DIR, "index.html"))
