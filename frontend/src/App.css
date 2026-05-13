@@ -40,7 +40,7 @@ body {
   height: 100dvh;
   overflow: hidden;
   display: grid;
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto auto minmax(0, 42vh);
   gap: clamp(.25rem, .8vh, .75rem);
   padding: clamp(.4rem, 1.2vh, 1.2rem) clamp(.75rem, 2.5vw, 2rem) clamp(.4rem, 1vh, 1rem);
   max-width: 1440px;
