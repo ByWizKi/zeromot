@@ -36,8 +36,13 @@ body {
 /* ─── LAYOUT ──────────────────────────────────────────────────────── */
 .app {
   position: relative;
-  min-height: 100vh;
-  padding: 0 2rem 4rem;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: clamp(.25rem, .8vh, .75rem);
+  padding: clamp(.4rem, 1.2vh, 1.2rem) clamp(.75rem, 2.5vw, 2rem) clamp(.4rem, 1vh, 1rem);
   max-width: 1440px;
   margin: 0 auto;
   transition: filter .1s;
@@ -115,14 +120,14 @@ body {
 /* ─── HEADER ──────────────────────────────────────────────────────── */
 .header {
   position: relative; z-index: 10;
-  padding: 2.5rem 0 0;
+  padding: 0;
   text-align: center;
 }
 .header-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.25rem;
+  margin-bottom: clamp(.3rem, .8vh, .8rem);
 }
 .header-badge {
   font-size: .72rem;
@@ -146,7 +151,7 @@ body {
 }
 .title {
   font-family: 'Orbitron', monospace;
-  font-size: clamp(3.5rem, 9vw, 8rem);
+  font-size: clamp(1.8rem, 5vw, 5rem);
   font-weight: 900;
   letter-spacing: .35em;
   color: var(--purple);
@@ -161,15 +166,15 @@ body {
   99% { opacity: .6; }
 }
 .subtitle {
-  font-size: .75rem;
+  font-size: clamp(.6rem, 1.2vw, .75rem);
   letter-spacing: 2px;
   color: var(--dim);
-  margin-top: .6rem;
+  margin-top: clamp(.2rem, .5vh, .5rem);
 }
 .header-line {
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--purple), transparent);
-  margin-top: 2rem;
+  margin-top: clamp(.4rem, 1vh, 1.2rem);
   opacity: .25;
 }
 
@@ -214,12 +219,12 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
-  padding: 3rem 0 2rem;
+  gap: clamp(.5rem, 1.5vh, 1.5rem);
+  padding: clamp(.4rem, 1vh, 1rem) 0;
 }
 .cagnotte-frame {
   position: relative;
-  padding: 2.5rem 4rem;
+  padding: clamp(.6rem, 1.5vh, 1.5rem) clamp(1.5rem, 5vw, 4rem);
   text-align: center;
   background: var(--surface);
   backdrop-filter: blur(24px);
@@ -244,7 +249,7 @@ body {
 }
 .cagnotte-value {
   font-family: 'Orbitron', monospace;
-  font-size: clamp(4rem, 13vw, 10rem);
+  font-size: clamp(2rem, 7vh, 6rem);
   font-weight: 900;
   line-height: 1;
   color: var(--purple);
@@ -255,7 +260,7 @@ body {
   display: flex;
   gap: 1.5rem;
   justify-content: center;
-  margin-top: 1rem;
+  margin-top: clamp(.3rem, .8vh, .8rem);
 }
 .stat-chip {
   display: flex;
@@ -287,7 +292,7 @@ body {
   font-size: .78rem;
   font-weight: 700;
   letter-spacing: 3px;
-  padding: 1rem 3.5rem;
+  padding: clamp(.5rem, 1.2vh, .9rem) clamp(1.5rem, 4vw, 3.5rem);
   cursor: pointer;
   overflow: hidden;
   box-shadow: var(--glow-p);
@@ -314,8 +319,9 @@ body {
   position: relative; z-index: 10;
   display: grid;
   grid-template-columns: 1fr 1.3fr;
-  gap: 1.5rem;
-  padding-top: .5rem;
+  gap: clamp(.5rem, 1.2vh, 1.5rem);
+  min-height: 0;
+  overflow: hidden;
 }
 @media (max-width: 860px) {
   .grid-content { grid-template-columns: 1fr; }
@@ -329,7 +335,11 @@ body {
   border: 1px solid var(--border);
   box-shadow: 0 8px 32px rgba(124,58,237,.07), 0 2px 8px rgba(0,0,0,.03);
   position: relative;
-  padding: 1.5rem;
+  padding: clamp(.75rem, 1.5vh, 1.5rem);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
 }
 .panel::before {
   content: '';
@@ -371,8 +381,10 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: .75rem;
-  padding: 2.5rem 1rem;
+  flex: 1;
+  padding: 1rem;
   color: var(--dim);
   font-size: .78rem;
   letter-spacing: 2px;
@@ -380,7 +392,7 @@ body {
 .empty-icon { font-size: 1.5rem; opacity: .35; }
 
 /* ─── LEADERBOARD ─────────────────────────────────────────────────── */
-.leaderboard { display: flex; flex-direction: column; gap: .5rem; }
+.leaderboard { display: flex; flex-direction: column; gap: .5rem; flex: 1; overflow-y: auto; min-height: 0; }
 .lb-row {
   display: grid;
   grid-template-columns: 2rem 1fr 100px 4.5rem 2.5rem;
@@ -441,8 +453,9 @@ body {
   display: flex;
   flex-direction: column;
   gap: .4rem;
-  max-height: 460px;
+  flex: 1;
   overflow-y: auto;
+  min-height: 0;
 }
 .feed-item {
   background: rgba(255,255,255,.45);
